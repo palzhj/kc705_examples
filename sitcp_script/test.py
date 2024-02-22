@@ -13,102 +13,22 @@ directory_path = os.path.dirname(current_path)
 sys.path.insert(0, directory_path+"/lib")
 import rbcp
 import sysmon
+import reg
 import spi
 import i2c
 
 # import interface
 
 TEST_REG    = 1
-TEST_SYSMON = 1
+TEST_SYSMON = 0
 TEST_TCP_TX = 1
-
-REG_SYN_INFO = 0x0
-REG_SYN_VER = 0x4
-REG_FPGA_DNA = 0x5
-REG_TCP_MODE = 0xd
-REG_TCP_TEST_TX_RATE = 0xe
-REG_TCP_TEST_NUM_OF_DATA = 0xf
-REG_TCP_TEST_DATA_GEN = 0x17
-REG_TCP_TEST_WORD_LEN = 0x18
-REG_TCP_TEST_SELECT_SEQ = 0x19
-REG_TCP_TEST_SEQ_PATTERN = 0x1a
-REG_TCP_TEST_BLK_SIZE = 0x1e
-REG_TCP_TEST_INS_ERROR = 0x21
-
-def read_info(): # the date of compiling
-    temp = reg.read(REG_SYN_INFO, 4)
-    # print(temp)
-    hour  = hex(temp[0]).lstrip("0x")
-    day   = hex(temp[1]).lstrip("0x")
-    month = hex(temp[2]).lstrip("0x")
-    year  = "20" + hex(temp[3]).lstrip("0x")
-    print("Compiling date: ", year, "-", month, "-", day, ",", hour, ":00")
-    temp = reg.read(REG_SYN_VER, 1)
-    print("Firmware version: ", temp[0])
-
-def read_fpga_dna(): # FPGA DNA
-    return reg.read(REG_FPGA_DNA, 8)
-
-def set_tcp_loopback_mode():
-    reg.write(REG_TCP_MODE, bytes([0x1]))
-
-def set_tcp_test_mode():
-    reg.write(REG_TCP_MODE, bytes([0x2]))
-
-def set_tcp_normal_mode():
-    reg.write(REG_TCP_MODE, bytes([0x0]))
-
-def set_tcp_test_tx_rate(speed_in_100Mbps):
-    speed_in_100Mbps &= 0xFF
-    reg.write(REG_TCP_TEST_TX_RATE, bytes([speed_in_100Mbps]))
-
-def set_tcp_test_num_of_data(num):
-    if num > 0xFFFF_FFFF_FFFF_FFFF:
-        print("Max length is 0xFFFFFFFFFFFFFFFF")
-        num = 0xFFFF_FFFF_FFFF_FFFF
-    bytes_num = num.to_bytes(8, byteorder='big')
-    # print(bytes_num)
-    reg.write(REG_TCP_TEST_NUM_OF_DATA, bytes_num)
-
-def set_tcp_test_data_gen(enable):
-    if(enable):
-        reg.write(REG_TCP_TEST_DATA_GEN, bytes([0x1]))
-    else:
-        reg.write(REG_TCP_TEST_DATA_GEN, bytes([0x0]))
-
-def set_tcp_test_word_len(len=8):
-    len = (len-1)&0x7
-    reg.write(REG_TCP_TEST_WORD_LEN, bytes([0x1]))
-
-def set_tcp_test_select_seq(enable):
-    if(enable):
-        reg.write(REG_TCP_TEST_SELECT_SEQ, bytes([0x1]))
-    else:
-        reg.write(REG_TCP_TEST_SELECT_SEQ, bytes([0x0]))
-
-def set_tcp_test_seq_pattern(pattern):
-    pattern &= 0xFFFFFFFF
-    bytes_num = pattern.to_bytes(4, byteorder='big')
-    # print(bytes_num)
-    reg.write(REG_TCP_TEST_SEQ_PATTERN, bytes_num)
-
-def set_tcp_test_blk_size(size):
-    if size > 0xFF_FFFF:
-        print("Max size is 0xFFFFFF")
-        size = 0xFFF_FFFF
-    bytes_num = size.to_bytes(3, byteorder='big')
-    # print(bytes_num)
-    reg.write(REG_TCP_TEST_BLK_SIZE, bytes_num)
-
-def set_tcp_test_ins_error():
-    reg.write(REG_TCP_TEST_INS_ERROR, bytes([1]))
 
 #################################################################
 # register test
 if TEST_REG:
-    reg = rbcp.Rbcp()
-    read_info()
-    # shift_led()
+    board_reg = reg.reg()
+    board_reg.read_info()
+    # board_reg.read_sitcp_reg()
 
 #################################################################
 # sysmon test
@@ -118,25 +38,36 @@ if TEST_SYSMON:
     print("")
 
 if TEST_TCP_TX:
-    num_of_data = 100_000_000
-    blk_size = 1024
-    tx_rate = 5 # unit: 100 Mbps
+    reg = reg.reg()
+    reg.set_sitcp_keep_alive()
+    reg.set_sitcp_fast_retrains()
+    reg.set_sitcp_nagle()
+    reg.set_sitcp_window_scaling()
+    reg.set_sitcp_retransmission_time(250)
 
-    set_tcp_test_data_gen(0)
-    set_tcp_test_tx_rate(tx_rate)
-    set_tcp_test_blk_size(blk_size)
-    set_tcp_test_num_of_data(num_of_data)
-
+    test_duration = 5 # seconds
+    tx_rate = 100 # unit: 100 Mbps
+    clear_buffer = 0
     check_data = 1
     print_error = 1
-    clear_buffer = 0
 
+    num_of_data = int(test_duration*tx_rate*100_000_000/8)
+    blk_size = 1024
+
+    reg.set_tcp_test_data_gen(0)
+    reg.set_tcp_test_tx_rate(tx_rate)
+    reg.set_tcp_test_blk_size(blk_size)
+    reg.set_tcp_test_num_of_data(num_of_data)
+
+    # Set socket timeout option
     timeout = 5
     socket.setdefaulttimeout(timeout)
+
     tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_ip = "192.168.10.16"
     server_port = 24
     tcp_socket.connect((server_ip, server_port))
+
     error_cnt = 0
     rxlength = -1
     if clear_buffer:     # clear buffer
@@ -151,14 +82,14 @@ if TEST_TCP_TX:
     rxlength = 0
     recv_data = []
     start = time.time()
-    set_tcp_test_data_gen(1)
+    reg.set_tcp_test_data_gen(1)
     try:
         while (rxlength < num_of_data):
             recv_data = tcp_socket.recv(1460)
             data_len = len(recv_data)
             # check data
             if check_data:
-                cycles = data_len%255 -1
+                cycles = data_len%255 - 1
                 last_data = recv_data[0]+cycles
                 if last_data > 0xFF:
                     last_data += 1
@@ -180,7 +111,7 @@ if TEST_TCP_TX:
         print("Timeout end")
     finally:
         tcp_socket.close()
-        set_tcp_test_data_gen(0)
+        reg.set_tcp_test_data_gen(0)
 
     print("\nData length: %d bytes"%rxlength)
     print("Duration: %f s"%run_time)

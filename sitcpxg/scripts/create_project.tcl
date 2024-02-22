@@ -23,6 +23,7 @@ set VERILOG_FILES "\
   top.v \
   RESET.v \
   RBCP_REG.v \
+  TCP_TEST.v \
   sitcpxg/sitcpxg.v \
   sitcpxg/SiTCPXG_XC7K_128K_V3.v \
   sitcpxg/TIMER.v \
