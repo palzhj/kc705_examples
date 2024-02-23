@@ -40,12 +40,12 @@ initial begin
   // Initialize Inputs
   rst = 1;
   sitcpxg_established = 0;
-  tx_rate = 90;
+  tx_rate = 10;
   num_of_data = 640;
   data_gen = 0;
   loopback = 0;
-  word_len = 0;
-  select_seq = 1;
+  word_len = 7;
+  select_seq = 0;
   seq_pattern = 64'h6080_8040;
   blk_size = 64;
   ins_error = 0;
@@ -63,6 +63,10 @@ initial begin
   sitcpxg_established = 1;
   #500;
   data_gen = 1;
+  #460;
+  @(posedge clk) ins_error = 1'b1;
+  @(posedge clk) ins_error = 1'b0;
+
 
 end
 

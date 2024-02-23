@@ -3,6 +3,9 @@
 # author: zhj@ihep.ac.cn
 # 2024-02-23 created
 
+import os
+import sys
+
 current_path = os.path.realpath(__file__)
 directory_path = os.path.dirname(current_path)
 sys.path.insert(0, directory_path+"/lib")

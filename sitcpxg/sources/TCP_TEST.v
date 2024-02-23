@@ -45,7 +45,7 @@ reg   [ 3:0]  irWordLen;
 reg           irSelectSeq;
 reg   [31:0]  irSeqPattern;
 reg   [24:0]  irBlockSize;
-reg   [ 2:0]  sftInsError;
+// reg   [ 2:0]  sftInsError;
 reg           irInsError;
 reg           irEstablished;
 reg           irTxAlmostFull;
@@ -93,10 +93,19 @@ always @(posedge CLK156M) begin
   irSelectSeq     <= SELECT_SEQ;
   irSeqPattern    <= SEQ_PATTERN;
   irBlockSize     <= {1'b1,BLK_SIZE[23:0]} - 25'd1;
-  sftInsError     <= {sftInsError[1:0],INS_ERROR};
-  irInsError      <= sftInsError[2];
+  // sftInsError     <= {sftInsError[1:0],INS_ERROR};
+  // irInsError      <= sftInsError[2];
   irEstablished   <= SiTCPXG_ESTABLISHED;
   irTxAlmostFull  <= SiTCPXG_TX_AFULL;
+end
+
+always @(posedge CLK156M) begin
+  if(RSTs) irInsError <= 1'b0;
+  else
+    if(INS_ERROR) irInsError <= 1'b1;
+    else
+      if (TxEnable) irInsError <= 1'b0;
+      else irInsError <= irInsError;
 end
 
 //------------------------------------------------------------------------------

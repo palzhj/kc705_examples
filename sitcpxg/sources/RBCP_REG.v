@@ -384,8 +384,9 @@ if (USE_CHIPSCOPE == 1) begin
   assign probe0[33] = wb_stb;
   assign probe0[34] = wb_cyc;
   assign probe0[35] = wb_ack;
+  assign probe0[36] = o_tcp_test_ins_error_trigger;
 
-  assign probe0[63:36] = 0;
+  assign probe0[63:37] = 0;
 
 end
 endgenerate

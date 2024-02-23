@@ -45,10 +45,11 @@ if TEST_TCP_TX:
     reg.set_sitcp_window_scaling()
     reg.set_sitcp_retransmission_time(250)
 
-    test_duration = 5 # seconds
+    test_duration = 20 # seconds
     tx_rate = 100 # unit: 100 Mbps
     clear_buffer = 0
-    check_data = 1
+    check_data_fast = 1 # Note that it's fast but it check the package head and tail only 
+    check_one_by_one = 0 # Note that it is very slow, the max speed is about 150Mbps
     print_error = 1
 
     num_of_data = int(test_duration*tx_rate*100_000_000/8)
@@ -88,7 +89,24 @@ if TEST_TCP_TX:
             recv_data = tcp_socket.recv(1460)
             data_len = len(recv_data)
             # check data
-            if check_data:
+            if rxlength != 0:
+                if((pre_data + 1) != recv_data[0]):
+                    if (pre_data==0xff)&(recv_data[0]==0x1):
+                        pass
+                    else:
+                        error_cnt += 2
+                        if print_error:
+                            print("boundry error: 0x%x, 0x%x"%(pre_data, recv_data[0]))
+            if check_one_by_one:
+                for i in range(data_len-1):
+                    if(recv_data[i]+1 != recv_data[i+1]):
+                        if (recv_data[i] == 0xff) & (recv_data[i+1] == 0x1):
+                            pass
+                        else:
+                            error_cnt += 1
+                            if print_error:
+                                print("error: 0x%x, 0x%x"%(recv_data[i], recv_data[i+1]))
+            elif check_data_fast:
                 cycles = data_len%255 - 1
                 last_data = recv_data[0]+cycles
                 if last_data > 0xFF:
@@ -99,10 +117,13 @@ if TEST_TCP_TX:
                     if print_error:
                         for i in range(data_len-1):
                             if(recv_data[i]+1 != recv_data[i+1]):
-                                if (recv_data[i] == 0xff) & (recv_data[i+1] != 0x1):
-                                    print("0x%x, 0x%x"%(recv_data[i], recv_data[i+1]))
+                                if (recv_data[i] == 0xff) & (recv_data[i+1] == 0x1):
+                                    pass
+                                else:
+                                    print("error: 0x%x, 0x%x"%(recv_data[i], recv_data[i+1]))
             rxlength += data_len
             # print(rxlength)
+            pre_data=recv_data[-1]
         stop = time.time()
         run_time = stop - start
     except socket.timeout:
@@ -116,5 +137,5 @@ if TEST_TCP_TX:
     print("\nData length: %d bytes"%rxlength)
     print("Duration: %f s"%run_time)
     print("Speed: %.2f Mbps"%(8*rxlength/run_time/1000_000))
-    if check_data:
-        print("Package error count: %d"%error_cnt)
+    if check_data_fast|check_one_by_one:
+        print("Package error count: %d"%(error_cnt/2))

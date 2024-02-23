@@ -41,7 +41,7 @@ module top #(
 );
 
 localparam DEBUG_SITCPXG  = 1;
-localparam DEBUG_RBCP_REG = 0;
+localparam DEBUG_RBCP_REG = 1;
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Clock
