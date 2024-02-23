@@ -74,7 +74,7 @@
 
 |name|bit_assignments|type|initial_value|reference|labels|comment|
 |:--|:--|:--|:--|:--|:--|:--|
-|tcp_test_tx_rate|[7:0]|rw|default: 0x00|||Transmission data rate in units of 100 Mbps for TCP test mode|
+|tcp_test_tx_rate|[7:0]|rw|default: 0x01|||Transmission data rate in units of 100 Mbps for TCP test mode|
 
 ### <div id="reg_table-tcp_test_num_of_data"></div>tcp_test_num_of_data
 
@@ -85,7 +85,7 @@
 
 |name|bit_assignments|type|initial_value|reference|labels|comment|
 |:--|:--|:--|:--|:--|:--|:--|
-|tcp_test_num_of_data|[63:0]|rw|default: 0x0000000000000400|||Number of bytes to be transmitted for TCP test mode|
+|tcp_test_num_of_data|[63:0]|rw|default: 0x0000000000004000|||Number of bytes to be transmitted for TCP test mode|
 
 ### <div id="reg_table-tcp_test_data_gen"></div>tcp_test_data_gen
 
@@ -140,7 +140,7 @@
 
 |name|bit_assignments|type|initial_value|reference|labels|comment|
 |:--|:--|:--|:--|:--|:--|:--|
-|tcp_test_blk_size|[23:0]|rw|default: 0x000040|||Transmission block size in bytes for TCP test mode|
+|tcp_test_blk_size|[23:0]|rw|default: 0x000400|||Transmission block size in bytes for TCP test mode|
 
 ### <div id="reg_table-tcp_test_ins_error"></div>tcp_test_ins_error
 
