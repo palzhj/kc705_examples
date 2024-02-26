@@ -194,7 +194,7 @@ assign  TxEnable  = genEnb & BlockCount[24] & TxCount[64];
 always @(posedge CLK156M) begin
   genEnb            <= irEstablished & ~irTxAlmostFull & irDataGen;
   BlockCount[24:0]  <= (irEstablished & (Bucket[31]|BlockCount[24]))?   (BlockCount[24:0] - {21'd0,(TxEnable? genWordLen[31:28]:  4'd0)}):  irBlockSize[24:0];
-  if(!irEstablished)begin
+  if(!(irEstablished& irDataGen))begin
     TxCount[64:0]   <= irNumOfData[64:0];
     RateCount[5:0]  <= 6'd0;
     AddToken[8:0]   <= 9'd0;
