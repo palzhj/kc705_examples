@@ -163,10 +163,10 @@ SiTCP_XC7K_32K_BBT_V110 SiTCP_XC7K(
   .GMII_CRS               (1'b0),                   // in: Carrier sense
   .GMII_COL               (1'b0),                   // in: Collision detected
   // Management IF
-  .GMII_MDC               (mdc_sys),                // out: Clock for MDIO
-  .GMII_MDIO_IN           (mdio_o_sys),             // in: Data
-  .GMII_MDIO_OUT          (mdio_i_sys),             // out: Data, when GMII_MDIO_OE = 0, GMII_MDIO_OUT = 0. must be pullup
-  .GMII_MDIO_OE           (mdio_i_sys_oe),          // out: MDIO output enable
+  .GMII_MDC               (),                       // out: Clock for MDIO
+  .GMII_MDIO_IN           (1'b0),                   // in: Data
+  .GMII_MDIO_OUT          (),                       // out: Data, when GMII_MDIO_OE = 0, GMII_MDIO_OUT = 0. must be pullup
+  .GMII_MDIO_OE           (),                       // out: MDIO output enable
 // User I/F
   .SiTCP_RST              (TCP_RST),                // out: Reset for SiTCP and related circuits
   // TCP connection control
@@ -227,13 +227,10 @@ gig_ethernet_pcs_pma gig_ethernet_pcs_pma_i(
   .gmii_rx_dv             (gmii_rx_dv),
   .gmii_rx_er             (gmii_rx_er),
   .gmii_isolate           (),
-  .mdc                    (mdc_out),
-  .mdio_i                 (mdio_mosi),
-  .mdio_o                 (mdio_miso),
-  .mdio_t                 (),
-  .phyaddr                (PHY_ADDRESS),
   .configuration_vector   (5'b10000),
-  .configuration_valid    (1'b0),
+  .an_interrupt           (),
+  .an_adv_config_vector   (16'b0000000000100001),
+  .an_restart_config      (1'b0),
   .status_vector          (status_vector),
   .reset                  (RST),
   .signal_detect          (GT_DETECT),
@@ -244,20 +241,6 @@ gig_ethernet_pcs_pma gig_ethernet_pcs_pma_i(
 assign gmii_tx_clk = userclk2;
 assign gmii_rx_clk = userclk2;
 assign CLKOUT = userclk2;
-
-wire mdc_init, mdio_i_init, mdio_complete;
-mdio_init mdio_init(
-  .clk                    (CLKOUT),         // in : system clock (125M)
-  .rst                    (~eth_rst_done),  // in : system reset
-  .phyaddr                (PHY_ADDRESS),    // in : [4:0] PHY address
-  .mdc                    (mdc_init),       // out: clock (1/128 system clock)
-  .mdio_out               (mdio_i_init),    // out: connect this to "PCS/PMA + RocketIO" module .mdio?_i()
-  .complete               (mdio_complete)   // out: initializing sequence has completed (active H)
-);
-
-assign mdc_out = mdio_complete? mdc_sys: mdc_init;
-assign mdio_mosi = mdio_complete? (mdio_i_sys_oe ? mdio_i_sys:1'b1): mdio_i_init;
-assign mdio_o_sys = mdio_complete? mdio_miso: 1'b1;
 
 generate
 if (USE_CHIPSCOPE == 1) begin
