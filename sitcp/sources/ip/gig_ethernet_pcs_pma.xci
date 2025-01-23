@@ -14,11 +14,11 @@
         "Standard": [ { "value": "1000BASEX", "resolve_type": "user", "usage": "all" } ],
         "MaxDataRate": [ { "value": "1G", "resolve_type": "user", "usage": "all" } ],
         "Physical_Interface": [ { "value": "Transceiver", "resolve_type": "user", "usage": "all" } ],
-        "Management_Interface": [ { "value": "true", "resolve_type": "user", "format": "bool", "usage": "all" } ],
+        "Management_Interface": [ { "value": "false", "value_src": "user", "resolve_type": "user", "format": "bool", "usage": "all" } ],
         "AXILite_Interface": [ { "value": "false", "resolve_type": "user", "format": "bool", "usage": "all" } ],
-        "Ext_Management_Interface": [ { "value": "false", "resolve_type": "user", "format": "bool", "usage": "all" } ],
+        "Ext_Management_Interface": [ { "value": "false", "resolve_type": "user", "format": "bool", "enabled": false, "usage": "all" } ],
         "MDIO_BOARD_INTERFACE": [ { "value": "Custom", "resolve_type": "user", "usage": "all" } ],
-        "Auto_Negotiation": [ { "value": "false", "value_src": "user", "resolve_type": "user", "format": "bool", "usage": "all" } ],
+        "Auto_Negotiation": [ { "value": "true", "value_src": "user", "resolve_type": "user", "format": "bool", "usage": "all" } ],
         "SGMII_Mode": [ { "value": "10_100_1000", "resolve_type": "user", "enabled": false, "usage": "all" } ],
         "SGMII_PHY_Mode": [ { "value": "false", "resolve_type": "user", "format": "bool", "usage": "all" } ],
         "Enable_1588": [ { "value": "false", "resolve_type": "user", "format": "bool", "usage": "all" } ],
@@ -60,9 +60,9 @@
         "c_use_tbi": [ { "value": "false", "resolve_type": "generated", "format": "bool", "usage": "all" } ],
         "c_is_2_5g": [ { "value": "false", "resolve_type": "generated", "format": "bool", "usage": "all" } ],
         "c_use_lvds": [ { "value": "false", "resolve_type": "generated", "format": "bool", "usage": "all" } ],
-        "c_has_an": [ { "value": "false", "resolve_type": "generated", "format": "bool", "usage": "all" } ],
+        "c_has_an": [ { "value": "true", "resolve_type": "generated", "format": "bool", "usage": "all" } ],
         "characterization": [ { "value": "false", "resolve_type": "generated", "format": "bool", "usage": "all" } ],
-        "c_has_mdio": [ { "value": "true", "resolve_type": "generated", "format": "bool", "usage": "all" } ],
+        "c_has_mdio": [ { "value": "false", "resolve_type": "generated", "format": "bool", "usage": "all" } ],
         "c_has_axil": [ { "value": "false", "resolve_type": "generated", "format": "bool", "usage": "all" } ],
         "c_has_ext_mdio": [ { "value": "false", "resolve_type": "generated", "format": "bool", "usage": "all" } ],
         "c_sgmii_phy_mode": [ { "value": "false", "resolve_type": "generated", "format": "bool", "usage": "all" } ],
@@ -152,13 +152,10 @@
         "gmii_rx_dv": [ { "direction": "out" } ],
         "gmii_rx_er": [ { "direction": "out" } ],
         "gmii_isolate": [ { "direction": "out" } ],
-        "mdc": [ { "direction": "in", "driver_value": "0" } ],
-        "mdio_i": [ { "direction": "in", "driver_value": "1" } ],
-        "mdio_o": [ { "direction": "out" } ],
-        "mdio_t": [ { "direction": "out" } ],
-        "phyaddr": [ { "direction": "in", "size_left": "4", "size_right": "0", "driver_value": "0" } ],
         "configuration_vector": [ { "direction": "in", "size_left": "4", "size_right": "0", "driver_value": "0" } ],
-        "configuration_valid": [ { "direction": "in", "driver_value": "0" } ],
+        "an_interrupt": [ { "direction": "out" } ],
+        "an_adv_config_vector": [ { "direction": "in", "size_left": "15", "size_right": "0", "driver_value": "0" } ],
+        "an_restart_config": [ { "direction": "in", "driver_value": "0" } ],
         "status_vector": [ { "direction": "out", "size_left": "15", "size_right": "0" } ],
         "reset": [ { "direction": "in" } ],
         "signal_detect": [ { "direction": "in", "driver_value": "1" } ],
@@ -166,20 +163,6 @@
         "gt0_qplloutrefclk_out": [ { "direction": "out" } ]
       },
       "interfaces": {
-        "mdio_pcs_pma": {
-          "vlnv": "xilinx.com:interface:mdio:1.0",
-          "abstraction_type": "xilinx.com:interface:mdio_rtl:1.0",
-          "mode": "slave",
-          "parameters": {
-            "CAN_DEBUG": [ { "value": "false", "resolve_type": "generated", "format": "bool", "is_ips_inferred": true, "is_static_object": false } ]
-          },
-          "port_maps": {
-            "MDC": [ { "physical_name": "mdc" } ],
-            "MDIO_I": [ { "physical_name": "mdio_i" } ],
-            "MDIO_O": [ { "physical_name": "mdio_o" } ],
-            "MDIO_T": [ { "physical_name": "mdio_t" } ]
-          }
-        },
         "gmii_pcs_pma": {
           "vlnv": "xilinx.com:interface:gmii:1.0",
           "abstraction_type": "xilinx.com:interface:gmii_rtl:1.0",
@@ -217,6 +200,18 @@
           },
           "port_maps": {
             "RST": [ { "physical_name": "reset" } ]
+          }
+        },
+        "an_interrupt_port": {
+          "vlnv": "xilinx.com:signal:interrupt:1.0",
+          "abstraction_type": "xilinx.com:signal:interrupt_rtl:1.0",
+          "mode": "master",
+          "parameters": {
+            "SENSITIVITY": [ { "value": "EDGE_RISING", "value_src": "constant", "usage": "all" } ],
+            "PortWidth": [ { "value": "1", "resolve_type": "generated", "format": "long", "is_ips_inferred": true, "is_static_object": false } ]
+          },
+          "port_maps": {
+            "INTERRUPT": [ { "physical_name": "an_interrupt" } ]
           }
         },
         "independent_clk_port": {

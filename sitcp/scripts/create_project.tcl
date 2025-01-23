@@ -24,7 +24,6 @@ set VERILOG_FILES "\
   RESET.v \
   RBCP_REG.v \
   SiTCP/SITCP.v \
-  SiTCP/MDIO_INIT.v \
   SiTCP/SiTCP_XC7K_32K_BBT_V110.V \
   SiTCP/TIMER.v \
   wishbone/RBCP2WB.v \
