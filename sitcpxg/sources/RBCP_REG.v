@@ -354,20 +354,6 @@ always @(*) begin
   end
 end
 
-// integer index;
-// always @(*) begin
-//   wb_dat_slave = 0;
-//   for(index = 0; index < I2C_NUM; index = index+1) begin
-//     wb_dat_slave[7:0] = wb_dat_slave[7:0] | {8{wb_i2c_ack[index]}} & wb_i2c_dat[8*index+7:8*index];
-//   end
-//   for(index = 0; index < SPI_NUM; index = index+1) begin
-//     wb_dat_slave[7:0] = wb_dat_slave[7:0] | {8{wb_spi_ack[index]}} & wb_spi_dat[8*index+7:8*index];
-//   end
-//   for(index = 0; index < UART_NUM; index = index+1) begin
-//     wb_dat_slave[7:0] = wb_dat_slave[7:0] | {8{wb_uart_ack[index]}} & wb_uart_dat[8*index+7:8*index];
-//   end
-// end
-
 //------------------------------------------------------------------------------
 
 generate

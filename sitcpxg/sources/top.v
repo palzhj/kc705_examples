@@ -1,6 +1,6 @@
 `timescale 1ps/1ps
 /*******************************************************************************
-* System      : u4FCP GbE readout                                           *
+* System      : u4FCP 10 GbE readout                                           *
 * Version     : v 1.1 2024/02/12                                               *
 *                                                                              *
 * Description : Top Module                                                     *
@@ -107,16 +107,16 @@ wire            tcp_open;
 wire            tcp_rst;
 wire            tcp_close;
 
-wire  [15:0]  tcp_rx_size;    // Receive buffer size(byte). Caution: Set a value of 4000 or more and (memory size-16) or less
-wire          tcp_rx_clr_enb; // Receive buffer Clear Enable
-wire          tcp_rx_clr_req; // Receive buffer Clear Request
-wire  [15:0]  tcp_rx_radr;    // Receive buffer read address in bytes (unused upper bits are set to 0)
-wire  [15:0]  tcp_rx_wadr;    // Receive buffer write address in bytes (lower 3 bits are not connected to memory)
-wire  [7 :0]  tcp_rx_wenb;    // Receive buffer byte write enable (big endian)
-wire  [63:0]  tcp_rx_wdat;    // Receive buffer write data (big endian)
-wire          tcp_tx_afull;   // TX fifo almost full
-wire  [63:0]  tcp_tx_d;       // Tx data[63:0]
-wire  [3 :0]  tcp_tx_b;       // Byte leng
+wire    [15:0]  tcp_rx_size;    // Receive buffer size(byte). Caution: Set a value of 4000 or more and (memory size-16) or less
+wire            tcp_rx_clr_enb; // Receive buffer Clear Enable
+wire            tcp_rx_clr_req; // Receive buffer Clear Request
+wire    [15:0]  tcp_rx_radr;    // Receive buffer read address in bytes (unused upper bits are set to 0)
+wire    [15:0]  tcp_rx_wadr;    // Receive buffer write address in bytes (lower 3 bits are not connected to memory)
+wire    [7 :0]  tcp_rx_wenb;    // Receive buffer byte write enable (big endian)
+wire    [63:0]  tcp_rx_wdat;    // Receive buffer write data (big endian)
+wire            tcp_tx_afull;   // TX fifo almost full
+wire    [63:0]  tcp_tx_d;       // Tx data[63:0]
+wire    [3 :0]  tcp_tx_b;       // Byte leng
 
 wire    [31: 0] rbcp_addr;
 wire            rbcp_we;
@@ -126,7 +126,7 @@ wire            rbcp_act;
 wire            rbcp_ack;
 wire    [7 : 0] rbcp_rd;
 
-wire clk156;
+wire            clk156;
 
 sitcpxg #(
   .USE_CHIPSCOPE            (DEBUG_SITCPXG & USE_CHIPSCOPE),
